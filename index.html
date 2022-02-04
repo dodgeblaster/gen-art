@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body
+        class="bg-gray-200 h-screen flex flex-col items-center justify-center"
+    >
+        <h1 class="text-3xl font-bold">Generative Art</h1>
+        <div
+            id="main"
+            class="container mx-auto my-2 shadow-lg relative overflow-hidden rounded-lg"
+        ></div>
+    </body>
+    <script>
+        const CANVAS_SIZE = 10
+        const SQUARE_SIZE = 50
+        const COLORS = [
+            '#241751', // darkPurple
+            '#2473aa', // darkBlue,
+            '#4bcbbe', // darkGreen,
+            '#d6fdf6', //lightGreen,
+            '#fff' // white
+        ]
+
+        const options = (top, left, color, color2, rotate) => {
+            const square = (html) =>
+                `<div class='flex justify-center items-center overflow-hidden absolute' style='height: ${SQUARE_SIZE}px; width: ${SQUARE_SIZE}px; background: ${color}; top: ${top}; left: ${left}; transform: rotate(${rotate}deg);'>${html}</div>`
+            return {
+                square: () => {
+                    return square('')
+                },
+                triangle: () => {
+                    const s = SQUARE_SIZE * 2
+                    const inner = `<div class='absolute top-0 left-0' style='background: ${color2}; height: ${s}px; width: ${s}px; transform-origin: 0% 0%; transform: rotate(45deg);'></div>`
+                    return square(inner)
+                },
+                circle: () => {
+                    const s = SQUARE_SIZE * 0.4
+                    const radius = SQUARE_SIZE / 2
+                    const inner = `<div style='background: ${color2}; height: ${s}px; width: ${s}px;  border-radius: ${radius}px;'></div>`
+                    return square(inner)
+                },
+                halfCircle: () => {
+                    const offset = SQUARE_SIZE / 2
+                    const inner = `<div style='background: ${color2}; position: absolute; height: ${SQUARE_SIZE}px; width: ${SQUARE_SIZE}px; top: 0; left: 0;  transform: translateY(-${offset}px); border-radius: ${offset}px;'></div>`
+                    return square(inner)
+                }
+            }
+        }
+
+        const calcTop = (x) => x * SQUARE_SIZE + 'px'
+        const calcLeft = (x) => x * SQUARE_SIZE + 'px'
+        const random = (l) => Math.floor(Math.random() * l)
+        const calcColor = (dontPick) => {
+            const i = random(COLORS.length)
+            const color = COLORS[i]
+            const backup = COLORS[(i + 1) % COLORS.length]
+            return color === dontPick ? backup : color
+        }
+        const calcRotate = () => ['0', '90', '180', '270'][random(4)]
+        const calcOption = () =>
+            ['circle', 'square', 'halfCircle', 'triangle'][random(4)]
+
+        let html = ''
+        const arr = (x) => Array.from({ length: x })
+        arr(CANVAS_SIZE).forEach((_, i) => {
+            arr(CANVAS_SIZE).forEach((_, ii) => {
+                const col1 = calcColor()
+                html =
+                    html +
+                    options(
+                        calcTop(i),
+                        calcLeft(ii),
+                        col1,
+                        calcColor(col1),
+                        calcRotate()
+                    )[calcOption()]()
+            })
+        })
+
+        document.getElementById('main').innerHTML = html
+        document.getElementById('main').style.height =
+            CANVAS_SIZE * SQUARE_SIZE + 'px'
+        document.getElementById('main').style.width =
+            CANVAS_SIZE * SQUARE_SIZE + 'px'
+    </script>
+</html>
